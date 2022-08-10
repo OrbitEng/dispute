@@ -530,6 +530,8 @@ name = "dispute"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "orbit-physical-market",
+ "transaction",
 ]
 
 [[package]]
@@ -753,6 +755,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "market-accounts"
+version = "0.1.0"
+source = "git+https://github.com/bruh-capital/accounts#62b93552cc756b12928b3cc64d2aacb6846edea2"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -819,6 +829,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
+name = "orbit-physical-market"
+version = "0.1.0"
+source = "git+https://github.com/bruh-capital/physical#96a623e952f49e2d87bd6e2e3c30ba425702ef75"
+dependencies = [
+ "anchor-lang",
+ "market-accounts",
+ "product",
+ "transaction",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -876,6 +897,14 @@ dependencies = [
  "syn",
  "version_check",
  "yansi",
+]
+
+[[package]]
+name = "product"
+version = "0.1.0"
+source = "git+https://github.com/bruh-capital/product#624b8cc4f2cef37d0ba1c87b0099e3b3d7dc6e14"
+dependencies = [
+ "anchor-lang",
 ]
 
 [[package]]
@@ -1249,6 +1278,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d82e1a7758622a465f8cee077614c73484dac5b836c02ff6a40d5d1010324d7"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "transaction"
+version = "0.1.0"
+source = "git+https://github.com/bruh-capital/transaction#f43e30de32f5370a0d9e9680c2e2bd3d3c417d6f"
+dependencies = [
+ "anchor-lang",
+ "product",
 ]
 
 [[package]]
