@@ -23,6 +23,8 @@ pub struct Initialize<'info>{
         space = 64,
         payer = payer
     )]
+    /// CHECK: we dont check this cuz theres nothing to check it against
+    /// its a system account
     pub dispute_market_auth: AccountInfo<'info>,
 
     #[account(mut)]

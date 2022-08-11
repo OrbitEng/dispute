@@ -1,1 +1,1 @@
-pub mod dispute_accessors;
+pub mod types;

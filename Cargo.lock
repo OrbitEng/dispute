@@ -530,7 +530,7 @@ name = "dispute"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "orbit-physical-market",
+ "market-accounts",
  "transaction",
 ]
 
@@ -827,17 +827,6 @@ name = "opaque-debug"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
-
-[[package]]
-name = "orbit-physical-market"
-version = "0.1.0"
-source = "git+https://github.com/bruh-capital/physical#96a623e952f49e2d87bd6e2e3c30ba425702ef75"
-dependencies = [
- "anchor-lang",
- "market-accounts",
- "product",
- "transaction",
-]
 
 [[package]]
 name = "parking_lot"
