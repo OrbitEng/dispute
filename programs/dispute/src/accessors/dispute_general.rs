@@ -22,11 +22,8 @@ pub struct OpenDispute<'info>{
     pub in_transaction: AccountInfo<'info>,
 
     #[account(
-        seeds = [
-            b"physical_auth"
-        ],
-        seeds::program = Pubkey::new(orbit_addresses::PHYSICAL_ADDRESS),
-        bump
+        constraint = 
+            caller.key() == Pubkey::new(&[]) // make this physical
     )]
     pub caller: Signer<'info>,
 
@@ -50,22 +47,18 @@ pub fn open_dispute(ctx: Context<OpenDispute>) -> Result<()>{
 #[derive(Accounts)]
 pub struct CloseDispute<'info>{
     #[account(
-        constraint = phys_dispute.state == OrbitDisputeState::Closed,
+        constraint = phys_dispute.state == OrbitDisputeState::Resolved,
         has_one = funder
     )]
     pub phys_dispute: Account<'info, OrbitDispute>,
 
     #[account(mut)]
-    /// CHECK: we dont check this because theres nothing to check it against
-    /// its a system account
+    /// CHECK: we mutate a system account
     pub funder: SystemAccount<'info>,
 
     #[account(
-        seeds = [
-            b"physical_auth"
-        ],
-        seeds::program = Pubkey::new(orbit_addresses::PHYSICAL_ADDRESS),
-        bump
+        constraint = 
+            caller.key() == Pubkey::new(&[]) // make this physical
     )]
     pub caller: Signer<'info>,
 }

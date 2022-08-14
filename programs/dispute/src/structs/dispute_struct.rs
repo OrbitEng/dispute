@@ -12,5 +12,5 @@ pub struct OrbitDispute{
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq)]
 pub enum OrbitDisputeState{
     Open,
-    Closed
+    Resolved
 }

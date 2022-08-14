@@ -15,11 +15,11 @@ pub mod dispute {
     pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
         Ok(())
     }
-    pub fn open_physical_dispute(_ctx: Context<OpenDispute>) -> Result<()> {
-        Ok(())
+    pub fn open_dispute(ctx: Context<OpenDispute>) -> Result<()> {
+        accessors::open_dispute(ctx)
     }
-    pub fn close_physical_dispute(_ctx: Context<CloseDispute>) -> Result<()> {
-        Ok(())
+    pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()> {
+        accessors::close_dispute(ctx)
     }
 }
 
