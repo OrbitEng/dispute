@@ -47,10 +47,10 @@ pub fn open_dispute(ctx: Context<OpenDispute>) -> Result<()>{
 #[derive(Accounts)]
 pub struct CloseDispute<'info>{
     #[account(
-        constraint = phys_dispute.state == OrbitDisputeState::Resolved,
+        constraint = dispute_account.state == OrbitDisputeState::Resolved,
         has_one = funder
     )]
-    pub phys_dispute: Account<'info, OrbitDispute>,
+    pub dispute_account: Account<'info, OrbitDispute>,
 
     #[account(mut)]
     /// CHECK: we mutate a system account
@@ -64,5 +64,5 @@ pub struct CloseDispute<'info>{
 }
 
 pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()>{
-    ctx.accounts.phys_dispute.close(ctx.accounts.funder.to_account_info())
+    ctx.accounts.dispute_account.close(ctx.accounts.funder.to_account_info())
 }
