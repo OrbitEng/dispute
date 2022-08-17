@@ -65,6 +65,7 @@ pub struct CloseDispute<'info>{
 }
 
 pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()>{
+    ctx.accounts.dispute_account.dispute_state = DisputeState::Closed;
     ctx.accounts.dispute_account.close(ctx.accounts.funder.to_account_info())
 }
 
