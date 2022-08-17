@@ -11,10 +11,7 @@ pub use accessors::*;
 #[program]
 pub mod dispute {
     use super::*;
-
-    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
-        Ok(())
-    }
+    
     pub fn open_dispute(ctx: Context<OpenDispute>, threshold: usize) -> Result<()> {
         accessors::open_dispute(ctx, threshold)
     }
@@ -24,22 +21,4 @@ pub mod dispute {
     pub fn vote_dispute(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()> {
         accessors::vote_dispute(ctx, vote)
     }
-}
-
-#[derive(Accounts)]
-pub struct Initialize<'info>{
-    #[account(
-        init,
-        seeds = [b"dispute_auth"],
-        bump,
-        space = 64,
-        payer = payer
-    )]
-    /// CHECK: It's a system account
-    pub dispute_market_auth: AccountInfo<'info>,
-
-    #[account(mut)]
-    pub payer : Signer<'info>,
-
-    pub system_program: Program<'info, System>
 }

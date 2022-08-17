@@ -18,5 +18,5 @@ default = []
 [dependencies]
 anchor-lang = "0.25.0"
 transaction = {git = "https://github.com/bruh-capital/transaction"}
-market-accounts = {git = "https://github.com/bruh-capital/accounts"}
+market-accounts = {git = "https://github.com/bruh-capital/accounts", features=["no-entrypoint"]}
 orbit-addresses = {git = "https://github.com/bruh-capital/addresses"}
