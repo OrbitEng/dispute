@@ -24,7 +24,7 @@ pub struct OpenDispute<'info>{
 
     #[account(
         constraint = 
-            caller.key() == Pubkey::new(&[]) // make this physical
+            (caller.key() == Pubkey::new(orbit_addresses::PHYSICAL_SIGNER))
     )]
     pub caller: Signer<'info>,
 

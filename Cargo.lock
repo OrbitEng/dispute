@@ -758,9 +758,10 @@ dependencies = [
 [[package]]
 name = "market-accounts"
 version = "0.1.0"
-source = "git+https://github.com/bruh-capital/accounts#6d3df5013525b03f56d81d5c9d7bd4c55d06a3d4"
+source = "git+https://github.com/bruh-capital/accounts#4a728ffed68cd7463805f98c541d8919e0be8025"
 dependencies = [
  "anchor-lang",
+ "orbit-addresses",
 ]
 
 [[package]]
@@ -900,7 +901,7 @@ dependencies = [
 [[package]]
 name = "product"
 version = "0.1.0"
-source = "git+https://github.com/bruh-capital/product#5e81861c634dd65227024fedef6ff7a2d25cd5e6"
+source = "git+https://github.com/bruh-capital/product#7b1bf515d628406fdf8b3e295c3822ad5fe00f81"
 dependencies = [
  "anchor-lang",
 ]
