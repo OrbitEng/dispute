@@ -7,7 +7,7 @@ use crate::{
         DisputeSide,
         DisputeVote
     },
-    DisputeErrors, program::Dispute
+    DisputeErrors
 };
 
 #[derive(Accounts)]

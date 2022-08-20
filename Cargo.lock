@@ -909,7 +909,7 @@ dependencies = [
 [[package]]
 name = "product"
 version = "0.1.0"
-source = "git+https://github.com/OrbitEng/product#2ef687de6e631a4b09697ea2070012b344130940"
+source = "git+https://github.com/OrbitEng/product#60d58c5e49c7bfa12dee581f6c52de3ceb09e075"
 dependencies = [
  "anchor-lang",
 ]
