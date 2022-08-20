@@ -6,6 +6,9 @@ pub struct OrbitDispute{
     pub favor: Pubkey,
     pub funder: Pubkey,
     pub dispute_state: DisputeState,
+
+    pub buyer: Pubkey,
+    pub seller: Pubkey,
     
     pub voters: Vec<DisputeVote>,
 

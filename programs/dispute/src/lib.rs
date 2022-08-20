@@ -4,7 +4,9 @@ declare_id!("HPDHvMeJ2Vepn5jEmsWNvEJwgFhY3WoNFZapKxQxQhDK");
 
 pub mod structs;
 pub mod accessors;
+pub mod errors;
 
+pub use errors::*;
 pub use structs::*;
 pub use accessors::*;
 

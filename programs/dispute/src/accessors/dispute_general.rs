@@ -1,6 +1,14 @@
 use anchor_lang::{prelude::*, AccountsClose};
 use market_accounts::structs::market_account::OrbitMarketAccount;
-use crate::structs::dispute_struct::{OrbitDispute, DisputeState, DisputeSide, DisputeVote};
+use crate::{
+    structs::dispute_struct::{
+        OrbitDispute,
+        DisputeState,
+        DisputeSide,
+        DisputeVote
+    },
+    DisputeErrors, program::Dispute
+};
 
 #[derive(Accounts)]
 pub struct OpenDispute<'info>{
@@ -20,13 +28,30 @@ pub struct OpenDispute<'info>{
     /// CHECK: accountinfo due to circular dependencies
     /// we do checks on initial contract
     /// and this contract is cpi auth bound
+    #[account(
+        constraint = *in_transaction.owner == caller_program.key()
+    )]
     pub in_transaction: AccountInfo<'info>,
+
+    pub buyer: Account<'info, OrbitMarketAccount>,
+
+    pub seller: Account<'info, OrbitMarketAccount>,
+
+    #[account(
+        seeds = [
+            b"dispute_auth"
+        ],
+        seeds::program = caller_program.key(),
+        bump
+    )]
+    pub caller: Signer<'info>,
 
     #[account(
         constraint = 
-            (caller.key() == Pubkey::new(orbit_addresses::PHYSICAL_SIGNER))
+            (caller.key() == Pubkey::new(orbit_addresses::PHYSICAL_ADDRESS))
     )]
-    pub caller: Signer<'info>,
+    /// CHECK: program calling. you will see why
+    pub caller_program: AccountInfo<'info>,
 
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -36,10 +61,16 @@ pub struct OpenDispute<'info>{
 }
 
 pub fn open_dispute(ctx: Context<OpenDispute>, threshold: usize) -> Result<()>{
+    if (threshold as u8 % 2) == 0{
+        return err!(DisputeErrors::EvenThreshold)
+    }
+
     ctx.accounts.new_dispute.favor = Pubkey::new_from_array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     ctx.accounts.new_dispute.dispute_state = DisputeState::Open;
     ctx.accounts.new_dispute.dispute_transaction = ctx.accounts.in_transaction.key();
     ctx.accounts.new_dispute.funder = ctx.accounts.payer.key();
+    ctx.accounts.new_dispute.buyer = ctx.accounts.buyer.key();
+    ctx.accounts.new_dispute.seller = ctx.accounts.seller.key();
 
     ctx.accounts.new_dispute.threshold = threshold;
     Ok(())
@@ -82,9 +113,9 @@ pub struct VoteDispute<'info>{
     pub market_account: Account<'info, OrbitMarketAccount>,
 
     #[account(
-        address = market_account.wallet
+        address = market_account.master_pubkey
     )]
-    pub market_wallet: Signer<'info>
+    pub market_auth: Signer<'info>
 }
 
 pub fn vote_dispute(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()>{
@@ -94,6 +125,21 @@ pub fn vote_dispute(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()>{
     });
 
     if ctx.accounts.dispute_account.voters.len() >= ctx.accounts.dispute_account.threshold{
+        let mut side = 0;
+        for vote in ctx.accounts.dispute_account.voters.iter(){
+            match vote.vote{
+                DisputeSide::Buyer => side += 1,
+                DisputeSide::Seller => side -= 1
+            }
+        }
+        if side > 0 {
+            ctx.accounts.dispute_account.favor = ctx.accounts.dispute_account.buyer;
+        }else
+        if side < 0{
+            ctx.accounts.dispute_account.favor = ctx.accounts.dispute_account.seller;
+        }else{
+            return err!(DisputeErrors::CannotCloseDispute)
+        }
         ctx.accounts.dispute_account.dispute_state = DisputeState::Resolved;
     }
     Ok(())
