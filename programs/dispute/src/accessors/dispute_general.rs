@@ -1,5 +1,6 @@
 use anchor_lang::{prelude::*, AccountsClose};
 use market_accounts::structs::market_account::OrbitMarketAccount;
+use orbit_addresses::PHYSICAL_ADDRESS;
 use crate::{
     structs::dispute_struct::{
         OrbitDispute,
@@ -60,8 +61,8 @@ pub struct OpenDispute<'info>{
 
 }
 
-pub fn open_dispute(ctx: Context<OpenDispute>, threshold: usize) -> Result<()>{
-    if (threshold as u8 % 2) == 0{
+pub fn open_dispute(ctx: Context<OpenDispute>, threshold: u8) -> Result<()>{
+    if (threshold % 2) == 0{
         return err!(DisputeErrors::EvenThreshold)
     }
 
@@ -72,7 +73,7 @@ pub fn open_dispute(ctx: Context<OpenDispute>, threshold: usize) -> Result<()>{
     ctx.accounts.new_dispute.buyer = ctx.accounts.buyer.key();
     ctx.accounts.new_dispute.seller = ctx.accounts.seller.key();
 
-    ctx.accounts.new_dispute.threshold = threshold;
+    ctx.accounts.new_dispute.threshold = threshold as usize;
     Ok(())
 }
 
@@ -89,10 +90,19 @@ pub struct CloseDispute<'info>{
     pub funder: SystemAccount<'info>,
 
     #[account(
-        constraint = 
-            caller.key() == Pubkey::new(&[]) // make this physical
+        seeds = [
+            b"market_authority"
+        ],
+        seeds::program = caller.key()
+        bump
     )]
-    pub caller: Signer<'info>,
+    pub caller_auth: Signer<'info>,
+
+    #[account(
+        constraint =
+            caller.key() == orbit_addresses::Pubkey::from(PHYSICAL_ADDRESS)
+    )]
+    pub caller: AccountInfo<'info>
 }
 
 pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()>{
