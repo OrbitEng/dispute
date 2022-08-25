@@ -40,12 +40,12 @@ pub struct OpenDispute<'info>{
 
     #[account(
         seeds = [
-            b"dispute_auth"
+            b"market_authority"
         ],
         seeds::program = caller_program.key(),
         bump
     )]
-    pub dispute_auth: Signer<'info>,
+    pub caller_auth: Signer<'info>,
 
     #[account(
         constraint = 
@@ -91,12 +91,12 @@ pub struct CloseDispute<'info>{
 
     #[account(
         seeds = [
-            b"dispute_auth"
+            b"market_authority"
         ],
         seeds::program = caller.key(),
         bump
     )]
-    pub dispute_auth: Signer<'info>,
+    pub caller_auth: Signer<'info>,
 
     #[account(
         constraint =
