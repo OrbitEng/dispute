@@ -93,15 +93,16 @@ pub struct CloseDispute<'info>{
         seeds = [
             b"market_authority"
         ],
-        seeds::program = caller.key()
+        seeds::program = caller.key(),
         bump
     )]
     pub caller_auth: Signer<'info>,
 
     #[account(
         constraint =
-            caller.key() == orbit_addresses::Pubkey::from(PHYSICAL_ADDRESS)
+            caller.key() == Pubkey::new(PHYSICAL_ADDRESS)
     )]
+    /// CHECK: there are constraints the linter can kill itself
     pub caller: AccountInfo<'info>
 }
 

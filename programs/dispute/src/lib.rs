@@ -14,7 +14,7 @@ pub use accessors::*;
 pub mod dispute {
     use super::*;
     
-    pub fn open_dispute(ctx: Context<OpenDispute>, threshold: usize) -> Result<()> {
+    pub fn open_dispute(ctx: Context<OpenDispute>, threshold: u8) -> Result<()> {
         accessors::open_dispute(ctx, threshold)
     }
     pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()> {
