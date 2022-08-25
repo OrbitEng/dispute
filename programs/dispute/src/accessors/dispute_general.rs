@@ -45,11 +45,11 @@ pub struct OpenDispute<'info>{
         seeds::program = caller_program.key(),
         bump
     )]
-    pub caller: Signer<'info>,
+    pub dispute_auth: Signer<'info>,
 
     #[account(
         constraint = 
-            (caller.key() == Pubkey::new(orbit_addresses::PHYSICAL_ADDRESS))
+            (caller_program.key() == Pubkey::new(orbit_addresses::PHYSICAL_ADDRESS))
     )]
     /// CHECK: program calling. you will see why
     pub caller_program: AccountInfo<'info>,
@@ -91,12 +91,12 @@ pub struct CloseDispute<'info>{
 
     #[account(
         seeds = [
-            b"market_authority"
+            b"dispute_auth"
         ],
         seeds::program = caller.key(),
         bump
     )]
-    pub caller_auth: Signer<'info>,
+    pub dispute_auth: Signer<'info>,
 
     #[account(
         constraint =
