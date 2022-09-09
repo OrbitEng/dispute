@@ -15,12 +15,15 @@ pub mod dispute {
     use super::*;
     
     pub fn open_dispute(ctx: Context<OpenDispute>, threshold: u8) -> Result<()> {
-        accessors::open_dispute(ctx, threshold)
+        open_dispute_handler(ctx, threshold)
     }
     pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()> {
-        accessors::close_dispute(ctx)
+        close_dispute_handler(ctx)
     }
     pub fn vote_dispute(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()> {
-        accessors::vote_dispute(ctx, vote)
+        vote_dispute_handler(ctx, vote)
+    }
+    pub fn cast_verdict(ctx: Context<DisputeVerdict>) -> Result<()>{
+        dispute_verdict_handler(ctx)
     }
 }

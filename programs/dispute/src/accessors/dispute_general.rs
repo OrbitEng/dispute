@@ -61,7 +61,7 @@ pub struct OpenDispute<'info>{
 
 }
 
-pub fn open_dispute(ctx: Context<OpenDispute>, threshold: u8) -> Result<()>{
+pub fn open_dispute_handler(ctx: Context<OpenDispute>, threshold: u8) -> Result<()>{
     if (threshold % 2) == 0{
         return err!(DisputeErrors::EvenThreshold)
     }
@@ -106,7 +106,7 @@ pub struct CloseDispute<'info>{
     pub caller: AccountInfo<'info>
 }
 
-pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()>{
+pub fn close_dispute_handler(ctx: Context<CloseDispute>) -> Result<()>{
     ctx.accounts.dispute_account.dispute_state = DisputeState::Closed;
     ctx.accounts.dispute_account.close(ctx.accounts.funder.to_account_info())
 }
@@ -117,10 +117,14 @@ pub fn close_dispute(ctx: Context<CloseDispute>) -> Result<()>{
 pub struct VoteDispute<'info>{
     #[account(
         mut,
-        constraint = dispute_account.dispute_state == DisputeState::Open
+        constraint = dispute_account.dispute_state == DisputeState::Open,
+        constraint = dispute_account.votes.len() < dispute_account.threshold
     )]
     pub dispute_account: Account<'info, OrbitDispute>,
 
+    #[account(
+        mut
+    )]
     pub market_account: Account<'info, OrbitMarketAccount>,
 
     #[account(
@@ -129,29 +133,67 @@ pub struct VoteDispute<'info>{
     pub market_auth: Signer<'info>
 }
 
-pub fn vote_dispute(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()>{
-    ctx.accounts.dispute_account.voters.push(DisputeVote{
-        voter: ctx.accounts.market_account.key(),
-        vote
-    });
+pub fn vote_dispute_handler(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()>{
+    for vote in ctx.accounts.dispute_account.votes.iter(){
+        if ctx.accounts.market_account.key() == vote.voter{
+            return err!(DisputeErrors::AlreadyVoted)
+        }
+    };
 
-    if ctx.accounts.dispute_account.voters.len() >= ctx.accounts.dispute_account.threshold{
-        let mut side = 0;
-        for vote in ctx.accounts.dispute_account.voters.iter(){
-            match vote.vote{
-                DisputeSide::Buyer => side += 1,
-                DisputeSide::Seller => side -= 1
+    ctx.accounts.dispute_account.votes.push(
+        DisputeVote{
+            voter: ctx.accounts.market_account.key(),
+            vote
+        }
+    );
+
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct DisputeVerdict<'info>{
+    #[account(
+        mut,
+        constraint = dispute_account.dispute_state == DisputeState::Open,
+    )]
+    pub dispute_account: Account<'info, OrbitDispute>,
+}
+
+pub fn dispute_verdict_handler(ctx: Context<DisputeVerdict>) -> Result<()>{
+    let buyers = ctx.accounts.dispute_account.votes.iter().enumerate().filter(|v| v.1.vote == DisputeSide::Buyer).map(|v| (v.0, v.1.clone())).collect::<Vec<(usize, DisputeVote)>>();
+
+    if buyers.len() > ctx.accounts.dispute_account.threshold/2{
+        ctx.accounts.dispute_account.favor = ctx.accounts.dispute_account.buyer;
+        for vote in buyers.iter(){
+            if ctx.remaining_accounts[vote.0].key() != vote.1.voter{
+                return err!(DisputeErrors::WrongRemainingAccounts);
             }
+            let mut market_account = Account::<OrbitMarketAccount>::try_from(&ctx.remaining_accounts[vote.0].to_account_info()).expect("could not deserialize remaining account");
+            market_account.dispute_discounts += 1;
+            market_account.exit(ctx.program_id)?;
         }
-        if side > 0 {
-            ctx.accounts.dispute_account.favor = ctx.accounts.dispute_account.buyer;
-        }else
-        if side < 0{
-            ctx.accounts.dispute_account.favor = ctx.accounts.dispute_account.seller;
-        }else{
-            return err!(DisputeErrors::CannotCloseDispute)
+        
+    }else
+    if ctx.accounts.dispute_account.votes.len() == ctx.accounts.dispute_account.threshold{
+        ctx.accounts.dispute_account.favor = ctx.accounts.dispute_account.seller;
+        
+        for v in ctx.accounts.dispute_account.votes.iter().enumerate(){
+            if v.1.vote != DisputeSide::Seller{
+                
+                if ctx.remaining_accounts[v.0].key() != v.1.voter{
+                    return err!(DisputeErrors::WrongRemainingAccounts);
+                }
+                let mut market_account: Account<OrbitMarketAccount> = Account::<OrbitMarketAccount>::try_from(&ctx.remaining_accounts[v.0].to_account_info()).expect("could not deserialize remaining account");
+                market_account.dispute_discounts += 1;
+                market_account.exit(ctx.program_id)?;
+
+            }
+            
         }
-        ctx.accounts.dispute_account.dispute_state = DisputeState::Resolved;
+    }else{
+        return err!(DisputeErrors::CannotCloseDispute)
     }
+
+    ctx.accounts.dispute_account.dispute_state = DisputeState::Resolved;
     Ok(())
 }

@@ -6,4 +6,8 @@ pub enum DisputeErrors{
     EvenThreshold,
     #[msg("can't close dispute")]
     CannotCloseDispute,
+    #[msg("you've already voted")]
+    AlreadyVoted,
+    #[msg("wrong remaining accounts")]
+    WrongRemainingAccounts,
 }

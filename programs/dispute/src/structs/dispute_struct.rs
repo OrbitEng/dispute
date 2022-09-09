@@ -10,7 +10,7 @@ pub struct OrbitDispute{
     pub buyer: Pubkey,
     pub seller: Pubkey,
     
-    pub voters: Vec<DisputeVote>,
+    pub votes: Vec<DisputeVote>,
 
     pub threshold: usize,
 }
