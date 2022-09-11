@@ -10,16 +10,10 @@ pub struct OrbitDispute{
     pub buyer: Pubkey,
     pub seller: Pubkey,
     
-    pub votes: Vec<DisputeVote>,
+    pub buyer_votes: Vec<Pubkey>,
+    pub seller_votes: Vec<Pubkey>,
 
     pub threshold: usize,
-}
-
-/// CHECK: yeah each struct is 40. there's stuff I should do about it. I'm not going to.
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq)]
-pub struct DisputeVote{
-    pub voter: Pubkey,
-    pub vote: DisputeSide
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq)]
