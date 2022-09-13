@@ -122,7 +122,10 @@ pub struct VoteDispute<'info>{
     pub dispute_account: Account<'info, OrbitDispute>,
 
     #[account(
-        mut
+        mut,
+        constraint = (market_account.key() != dispute_account.buyer) && (market_account.key() != dispute_account.seller),
+        constraint = market_account.transactions > 3,
+        constraint = (Clock::get()?.unix_timestamp - market_account.account_created) > 604_800 // greater than a week
     )]
     pub market_account: Account<'info, OrbitMarketAccount>,
 

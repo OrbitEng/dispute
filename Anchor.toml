@@ -1,7 +1,8 @@
 [features]
 seeds = false
+
 [programs.localnet]
-dispute = "HPDHvMeJ2Vepn5jEmsWNvEJwgFhY3WoNFZapKxQxQhDK"
+dispute = "47Cg73teV9DtZbVDhRyLcqWhwv823btXJeVjfu7UvePf"
 
 [registry]
 url = "https://anchor.projectserum.com"
