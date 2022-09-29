@@ -125,14 +125,18 @@ pub struct VoteDispute<'info>{
         mut,
         constraint = (market_account.key() != dispute_account.buyer) && (market_account.key() != dispute_account.seller),
         constraint = market_account.transactions > 3,
-        constraint = (Clock::get()?.unix_timestamp - market_account.account_created) > 604_800 // greater than a week
+        constraint = (Clock::get()?.unix_timestamp - market_account.account_created) > 604_800, // greater than a week
+
+        seeds = [
+            b"orbit_account",
+            wallet.key().as_ref()
+        ],
+        bump,
+        seeds::program = market_accounts::ID
     )]
     pub market_account: Account<'info, OrbitMarketAccount>,
 
-    #[account(
-        address = market_account.master_pubkey
-    )]
-    pub market_auth: Signer<'info>
+    pub wallet: Signer<'info>
 }
 
 pub fn vote_dispute_handler(ctx: Context<VoteDispute>, vote: DisputeSide) -> Result<()>{
