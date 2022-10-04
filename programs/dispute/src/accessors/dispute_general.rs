@@ -33,9 +33,9 @@ pub struct OpenDispute<'info>{
     )]
     pub in_transaction: AccountInfo<'info>,
 
-    pub buyer: Account<'info, OrbitMarketAccount>,
+    pub buyer:Box<Account<'info, OrbitMarketAccount>>,
 
-    pub seller: Account<'info, OrbitMarketAccount>,
+    pub seller:Box<Account<'info, OrbitMarketAccount>>,
 
     #[account(
         seeds = [
@@ -134,7 +134,7 @@ pub struct VoteDispute<'info>{
         bump,
         seeds::program = market_accounts::ID
     )]
-    pub market_account: Account<'info, OrbitMarketAccount>,
+    pub market_account:Box<Account<'info, OrbitMarketAccount>>,
 
     pub wallet: Signer<'info>
 }
