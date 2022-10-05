@@ -65,12 +65,12 @@ pub fn open_dispute_handler(ctx: Context<OpenDispute>, threshold: u8) -> Result<
         return err!(DisputeErrors::EvenThreshold)
     }
 
-    ctx.accounts.new_dispute.favor = Pubkey::new_from_array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+    ctx.accounts.new_dispute.favor = 0;
     ctx.accounts.new_dispute.dispute_state = DisputeState::Open;
     ctx.accounts.new_dispute.dispute_transaction = ctx.accounts.in_transaction.key();
     ctx.accounts.new_dispute.funder = ctx.accounts.payer.key();
-    ctx.accounts.new_dispute.buyer = ctx.accounts.buyer.key();
-    ctx.accounts.new_dispute.seller = ctx.accounts.seller.key();
+    ctx.accounts.new_dispute.buyer = ctx.accounts.buyer.voter_id;
+    ctx.accounts.new_dispute.seller = ctx.accounts.seller.voter_id;
 
     ctx.accounts.new_dispute.threshold = threshold as usize;
     Ok(())
@@ -123,7 +123,7 @@ pub struct VoteDispute<'info>{
 
     #[account(
         mut,
-        constraint = (market_account.key() != dispute_account.buyer) && (market_account.key() != dispute_account.seller),
+        constraint = (market_account.voter_id != dispute_account.buyer) && (market_account.voter_id != dispute_account.seller),
         constraint = market_account.transactions > 3,
         constraint = (Clock::get()?.unix_timestamp - market_account.account_created) > 604_800, // greater than a week
 
@@ -163,6 +163,7 @@ pub struct DisputeVerdict<'info>{
     pub dispute_account: Account<'info, OrbitDispute>,
 }
 
+/// remaining accounts is buyers[] then sellers[]
 pub fn dispute_verdict_handler(ctx: Context<DisputeVerdict>) -> Result<()>{
     let thresh = ctx.accounts.dispute_account.threshold/2;
 
