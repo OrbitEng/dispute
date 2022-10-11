@@ -29,13 +29,13 @@ pub struct OpenDispute<'info>{
     /// we do checks on initial contract
     /// and this contract is cpi auth bound
     #[account(
-        constraint = *in_transaction.owner == caller_program.key()
+        owner = caller_program.key()
     )]
     pub in_transaction: AccountInfo<'info>,
 
-    pub buyer:Box<Account<'info, OrbitMarketAccount>>,
+    pub buyer: Box<Account<'info, OrbitMarketAccount>>,
 
-    pub seller:Box<Account<'info, OrbitMarketAccount>>,
+    pub seller: Box<Account<'info, OrbitMarketAccount>>,
 
     #[account(
         seeds = [
@@ -134,7 +134,7 @@ pub struct VoteDispute<'info>{
         bump,
         seeds::program = market_accounts::ID
     )]
-    pub market_account:Box<Account<'info, OrbitMarketAccount>>,
+    pub market_account: Box<Account<'info, OrbitMarketAccount>>,
 
     pub wallet: Signer<'info>
 }
