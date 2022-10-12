@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*, AccountsClose};
-use market_accounts::structs::market_account::OrbitMarketAccount;
+use market_accounts::{structs::market_account::OrbitMarketAccount, program::OrbitMarketAccounts};
 use orbit_addresses::PHYSICAL_ADDRESS;
 use crate::{
     structs::dispute_struct::{
@@ -7,7 +7,7 @@ use crate::{
         DisputeState,
         DisputeSide
     },
-    DisputeErrors
+    DisputeErrors, program::Dispute
 };
 
 #[derive(Accounts)]
@@ -161,10 +161,22 @@ pub struct DisputeVerdict<'info>{
         constraint = dispute_account.dispute_state == DisputeState::Open,
     )]
     pub dispute_account: Account<'info, OrbitDispute>,
+
+    #[account(
+        seeds = [
+            b"market_authority"
+        ],
+        bump
+    )]
+    pub dispute_auth: SystemAccount<'info>,
+
+    pub dispute_program: Program<'info, Dispute>,
+    
+    pub market_accounts_program: Program<'info, OrbitMarketAccounts>
 }
 
 /// remaining accounts is buyers[] then sellers[]
-pub fn dispute_verdict_handler(ctx: Context<DisputeVerdict>) -> Result<()>{
+pub fn dispute_verdict_handler<'a>(ctx: Context<'_, '_, '_, 'a, DisputeVerdict<'a>>) -> Result<()>{
     let thresh = ctx.accounts.dispute_account.threshold/2;
 
     if ctx.accounts.dispute_account.buyer_votes.len() > thresh{
@@ -173,10 +185,19 @@ pub fn dispute_verdict_handler(ctx: Context<DisputeVerdict>) -> Result<()>{
             if ctx.remaining_accounts[vote.0].key() != *vote.1{
                 return err!(DisputeErrors::WrongRemainingAccounts);
             }
-            let mut market_account = Account::<OrbitMarketAccount>::try_from(&ctx.remaining_accounts[vote.0].to_account_info()).expect("could not deserialize remaining account");
-            market_account.dispute_discounts += 1;
-            market_account.exit(ctx.program_id)?;
         }
+        let mut cpi_ctx = 
+            CpiContext::new(
+                ctx.accounts.market_accounts_program.to_account_info(),
+                market_accounts::cpi::accounts::MarketAccountMultipleUpdateInternal{
+                    caller_auth: ctx.accounts.dispute_auth.to_account_info(),
+                    caller: ctx.accounts.dispute_program.to_account_info()
+                }
+            );
+        cpi_ctx.remaining_accounts = ctx.remaining_accounts[0..ctx.accounts.dispute_account.buyer_votes.len()].to_vec();
+        market_accounts::cpi::increment_dispute_discounts_multiple(
+            cpi_ctx
+        )?;
         
     }else
     if ctx.accounts.dispute_account.seller_votes.len() > thresh{
@@ -187,11 +208,18 @@ pub fn dispute_verdict_handler(ctx: Context<DisputeVerdict>) -> Result<()>{
             if ctx.remaining_accounts[vote.0 + buyer_len].key() != *vote.1{
                 return err!(DisputeErrors::WrongRemainingAccounts);
             }
-            let mut market_account: Account<OrbitMarketAccount> = Account::<OrbitMarketAccount>::try_from(&ctx.remaining_accounts[vote.0 + buyer_len].to_account_info()).expect("could not deserialize remaining account");
-            market_account.dispute_discounts += 1;
-            market_account.exit(ctx.program_id)?;
-            
         }
+        let mut cpi_ctx = CpiContext::new(
+            ctx.accounts.market_accounts_program.to_account_info(),
+            market_accounts::cpi::accounts::MarketAccountMultipleUpdateInternal{
+                caller_auth: ctx.accounts.dispute_auth.to_account_info(),
+                caller: ctx.accounts.dispute_program.to_account_info()
+            }
+        );
+        cpi_ctx.remaining_accounts = ctx.remaining_accounts[buyer_len..].to_vec();
+        market_accounts::cpi::increment_dispute_discounts_multiple(
+            cpi_ctx
+        )?;
     }else{
         return err!(DisputeErrors::CannotCloseDispute)
     }
