@@ -15,7 +15,7 @@ pub struct OpenDispute<'info>{
     #[account(
         init,
         payer = payer,
-        space = 1000,
+        space = 500,
 
         seeds = [
             b"dispute_account",

@@ -2,9 +2,9 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct OrbitDispute{
-    pub dispute_transaction: Pubkey,
-    pub favor: u64,
-    pub funder: Pubkey,
+    pub dispute_transaction: Pubkey, // 32
+    pub favor: u64, // 8
+    pub funder: Pubkey, // 32
     pub dispute_state: DisputeState,
 
     pub buyer: u64,
