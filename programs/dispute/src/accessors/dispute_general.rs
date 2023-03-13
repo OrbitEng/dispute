@@ -48,7 +48,7 @@ pub struct OpenDispute<'info>{
 
     #[account(
         constraint = 
-            (caller_program.key() == Pubkey::new(orbit_addresses::PHYSICAL_ADDRESS))
+            (caller_program.key() == Pubkey::from(orbit_addresses::PHYSICAL_ADDRESS))
     )]
     /// CHECK: program calling. you will see why
     pub caller_program: AccountInfo<'info>,
@@ -99,7 +99,7 @@ pub struct CloseDispute<'info>{
 
     #[account(
         constraint =
-            caller.key() == Pubkey::new(PHYSICAL_ADDRESS)
+            caller.key() == Pubkey::from(PHYSICAL_ADDRESS)
     )]
     /// CHECK: there are constraints the linter can kill itself
     pub caller: AccountInfo<'info>
